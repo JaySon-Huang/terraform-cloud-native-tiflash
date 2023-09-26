@@ -171,7 +171,7 @@ resource "aws_instance" "tiflash_write" {
   private_ip                  = "172.31.9.${count.index + 1}"
 
   root_block_device {
-    volume_size           = 300
+    volume_size           = 600
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 4000
@@ -257,7 +257,7 @@ resource "aws_instance" "center" {
   }
 
   root_block_device {
-    volume_size           = 100
+    volume_size           = 300
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 3000

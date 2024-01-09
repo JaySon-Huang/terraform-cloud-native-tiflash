@@ -3,10 +3,10 @@
 locals {
   # image is region-local. If you changed region, please also change image.
   region = "us-west-2"
-  image = "ami-0fbf55055efe5787e" # centos7 aarch64
+  image  = "ami-04f798ca92cc13f74" # CentOS 7
 
-  # # If you want to change instance type, ensure that GP3 EBS is available in the instance type.
-  center_instance  = "m6g.2xlarge"
+  # If you want to change instance type, ensure that GP3 EBS is available in the instance type.
+  center_instance  = "c5.2xlarge"
 
   master_ssh_key         = "./master_key"
   master_ssh_public      = "./master_key.pub"

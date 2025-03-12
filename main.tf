@@ -173,7 +173,7 @@ resource "aws_instance" "center" {
   ami                         = local.image
   instance_type               = local.center_instance
   key_name                    = aws_key_pair.master_key.id
-  vpc_security_group_ids      = [aws_security_group.ssh.id]
+  vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.vectorbench.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
   subnet_id                   = aws_subnet.main.id
   associate_public_ip_address = true

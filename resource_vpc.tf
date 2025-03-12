@@ -68,3 +68,14 @@ resource "aws_security_group" "grafana" {
   name_prefix = "grafana-"
   vpc_id = aws_vpc.main.id
 }
+
+resource "aws_security_group" "vectorbench" {
+  ingress {
+    from_port   = 8501
+    to_port     = 8501
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  name_prefix = "vectorbench-"
+  vpc_id = aws_vpc.main.id
+}

@@ -101,11 +101,11 @@ resource "aws_instance" "tikv" {
   private_ip                  = local.tikv_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 400
+    volume_size           = local.tikv_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 4000
-    throughput            = 288
+    throughput            = local.tikv_volume_throughput
   }
 
   tags = {
@@ -128,11 +128,11 @@ resource "aws_instance" "tiflash_write" {
   private_ip                  = local.tiflash_write_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 400
+    volume_size           = local.tiflash_wn_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 4000
-    throughput            = 288
+    throughput            = local.tiflash_volume_throughput
   }
 
   tags = {
@@ -155,11 +155,11 @@ resource "aws_instance" "tiflash_compute" {
   private_ip                  = local.tiflash_compute_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 400
+    volume_size           = local.tiflash_cn_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 4000
-    throughput            = 288
+    throughput            = local.tiflash_volume_throughput
   }
 
   tags = {

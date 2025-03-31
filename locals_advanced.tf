@@ -11,11 +11,18 @@ locals {
   image  = "ami-003e5556ddc999e13"
 
   # If you want to change instance type, ensure that GP3 EBS is available in the instance type.
-  tidb_instance    = "c5.2xlarge"
-  tikv_instance    = "c5.2xlarge"
-  pd_instance      = "c5.2xlarge"
+  tidb_instance    = "c5.4xlarge"
+  tikv_instance    = "m5.4xlarge"
+  pd_instance      = "m5.2xlarge"
   tiflash_instance = "r5.2xlarge"
   center_instance  = "c5.2xlarge"
+
+  tikv_volume_size       = 4096
+  tiflash_cn_volume_size = 400
+  tiflash_wn_volume_size = 4096
+
+  tikv_volume_throughput = 593
+  tiflash_volume_throughput = 288
 
   master_ssh_key         = "./master_key"
   master_ssh_public      = "./master_key.pub"

@@ -3,8 +3,8 @@
 locals {
   # image is region-local. If you changed region, please also change image.
   region = "us-west-2"
-  # https://cloud-images.ubuntu.com/locator/ec2/
-  image = "ami-08e65f4539212dfd2" # ubuntu 22.04 aarch64
+  # https://rockylinux.org/download
+  image = "ami-03be04a3da3a40226" # Rocky-9-EC2-Base-9.5-20241118.0.aarch64
 
   # # If you want to change instance type, ensure that GP3 EBS is available in the instance type.
   center_instance  = "m6g.2xlarge"

@@ -2,29 +2,21 @@ global:
   user: "tidb"
   ssh_port: 22
   deploy_dir: "/tidb-deploy"
+  arch: "arm64"
 
 server_configs:
   tidb:
-    enable-safe-point-v2: true
-    force-enable-vector-type: true
+    #enable-safe-point-v2: true
+    #force-enable-vector-type: true
     disaggregated-tiflash: true
-    keyspace-name: "a"
-    ratelimit.full-speed: 1048576000
-    ratelimit.full-speed-capacity: 1048576000
-    ratelimit.low-speed-watermark: 1048576000000
-    ratelimit.block-write-watermark: 1048576000000
-    security.enable-sem: false
-    tiflash-replicas.constraints: [{"key": "engine", "op": "in", "values": ["tiflash"]}, {"key": "engine_role", "op": "in", "values": ["write"]}]
-    tiflash-replicas.group-id: "enable_s3_wn_region"
-    tiflash-replicas.extra-s3-rule: false
-    tiflash-replicas.min-count: 1
+    #keyspace-name: "a"
   tikv:
-    storage.enable-ttl: true
-    storage.api-version: 2
-    dfs.prefix: "local-cluster"
-    dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
-    dfs.s3-bucket: ${s3_bucket}
-    dfs.s3-region: "${s3_region}"
+    #storage.enable-ttl: true
+    #storage.api-version: 2
+    #dfs.prefix: "local-cluster"
+    #dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
+    #dfs.s3-bucket: ${s3_bucket}
+    #dfs.s3-region: "${s3_region}"
   pd:
     replication.enable-placement-rules: true
     replication.location-labels: ["host"]
@@ -34,7 +26,7 @@ server_configs:
     schedule.low-space-ration: 1.0
     schedule.replica-schedule-limit: 500
   tiflash:
-    enable_safe_point_v2: true
+    #enable_safe_point_v2: true
 
 tidb_servers:
   %{~ for host in tidb_hosts ~}
@@ -57,14 +49,14 @@ tiflash_servers:
       storage.s3.bucket: ${s3_bucket}
       storage.s3.root: /tiflash-cse/
       storage.main.dir: ["/tidb-deploy/tiflash-9000/data"]
-      storage.api_version: 2
+      #storage.api_version: 2
     learner_config:
-      dfs.prefix: "local-cluster"
-      dfs.s3-endpoint: "http://s3.${s3_region}.amazonaws.com"
-      dfs.s3-bucket: ${s3_bucket}
-      dfs.s3-region:  "${s3_region}"
-      storage.api-version: 2
-      storage.enable-ttl: true
+      #dfs.prefix: "local-cluster"
+      #dfs.s3-endpoint: "http://s3.${s3_region}.amazonaws.com"
+      #dfs.s3-bucket: ${s3_bucket}
+      #dfs.s3-region:  "${s3_region}"
+      #storage.api-version: 2
+      #storage.enable-ttl: true
   %{~ endfor ~}
   %{~ for host in tiflash_compute_hosts ~}
   - host: ${host}

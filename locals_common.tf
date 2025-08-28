@@ -1,4 +1,4 @@
 locals {
-  namespace         = "jayson-arm-build"
+  namespace         = "jayson-amd-build"
   username          = "rocky"
 }

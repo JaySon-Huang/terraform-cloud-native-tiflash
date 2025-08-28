@@ -44,11 +44,13 @@ resource "aws_instance" "center" {
   private_ip                  = "172.31.1.1"
 
   root_block_device {
+    # The IOPS and throughput settings are also related to the EC2 instance type.
+    # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
     volume_size           = 100
     delete_on_termination = true
     volume_type           = "gp3"
-    iops                  = 3000
-    throughput            = 125
+    iops                  = 16000
+    throughput            = 625
   }
 
   tags = {

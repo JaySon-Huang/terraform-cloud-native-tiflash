@@ -8,7 +8,7 @@ locals {
 
   # If you want to change instance type, ensure that GP3 EBS is available in the instance type.
   # https://aws.amazon.com/ec2/instance-types/
-  center_instance  = "m7i.2xlarge"
+  center_instance  = "m7i.4xlarge"
 
   master_ssh_key         = "./master_key"
   master_ssh_public      = "./master_key.pub"

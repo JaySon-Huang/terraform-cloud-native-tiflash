@@ -42,6 +42,26 @@ locals {
     })}
     EOT
 
+    userdata_topology_ng_yaml = <<-EOT
+    #cloud-config
+    ${yamlencode({
+        write_files = [{
+            path        = "/home/${local.username}/topology.ng.yaml"
+            permissions = "0644"
+            owner       = "${local.username}:${local.username}"
+            encoding    = "b64"
+            content     = base64encode(templatefile("./files/topology.ng.yaml.tftpl", {
+                tidb_hosts = local.tidb_private_ips,
+                tikv_hosts = local.tikv_private_ips,
+                tiflash_write_hosts = local.tiflash_write_private_ips,
+                tiflash_compute_hosts = local.tiflash_compute_private_ips,
+                s3_region = local.region,
+                s3_bucket = aws_s3_bucket.main.bucket,
+            }))
+        }]
+    })}
+    EOT
+
     userdata_master_ssh_pairs = <<-EOT
     #cloud-config
     ${yamlencode({
@@ -91,6 +111,13 @@ data "cloudinit_config" "center_server" {
         content_type = "text/cloud-config"
         filename     = "write_topology.cfg"
         content      = local.userdata_topology_yaml
+        merge_type   = local.cloudinit_merge_type
+    }
+
+    part {
+        content_type = "text/cloud-config"
+        filename     = "write_topology_ng.cfg"
+        content      = local.userdata_topology_ng_yaml
         merge_type   = local.cloudinit_merge_type
     }
 

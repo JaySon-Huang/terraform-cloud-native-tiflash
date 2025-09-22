@@ -49,11 +49,11 @@ resource "aws_instance" "tidb" {
   private_ip                  = local.tidb_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 100
+    volume_size           = local.tidb_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 3000
-    throughput            = 125
+    throughput            = 625
   }
 
   tags = {
@@ -74,11 +74,11 @@ resource "aws_instance" "pd" {
   private_ip                  = local.pd_private_ip
 
   root_block_device {
-    volume_size           = 100
+    volume_size           = local.pd_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 3000
-    throughput            = 125
+    throughput            = 625
   }
 
   tags = {
@@ -101,11 +101,11 @@ resource "aws_instance" "tikv" {
   private_ip                  = local.tikv_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 400
+    volume_size           = local.tikv_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
-    iops                  = 4000
-    throughput            = 288
+    iops                  = 16000
+    throughput            = 625
   }
 
   tags = {
@@ -119,7 +119,7 @@ resource "aws_instance" "tiflash_write" {
   count = local.n_tiflash_write
 
   ami                         = local.image
-  instance_type               = local.tiflash_instance
+  instance_type               = local.tiflash_write_instance
   key_name                    = aws_key_pair.master_key.id
   vpc_security_group_ids      = [aws_security_group.ssh.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
@@ -128,11 +128,11 @@ resource "aws_instance" "tiflash_write" {
   private_ip                  = local.tiflash_write_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 400
+    volume_size           = local.tiflash_write_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
-    iops                  = 4000
-    throughput            = 288
+    iops                  = 16000
+    throughput            = 625
   }
 
   tags = {
@@ -146,7 +146,7 @@ resource "aws_instance" "tiflash_compute" {
   count = local.n_tiflash_compute
 
   ami                         = local.image
-  instance_type               = local.tiflash_instance
+  instance_type               = local.tiflash_compute_instance
   key_name                    = aws_key_pair.master_key.id
   vpc_security_group_ids      = [aws_security_group.ssh.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
@@ -155,11 +155,11 @@ resource "aws_instance" "tiflash_compute" {
   private_ip                  = local.tiflash_compute_private_ips[count.index]
 
   root_block_device {
-    volume_size           = 400
+    volume_size           = local.tiflash_compute_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
-    iops                  = 4000
-    throughput            = 288
+    iops                  = 16000
+    throughput            = 1000
   }
 
   tags = {
@@ -180,11 +180,11 @@ resource "aws_instance" "center" {
   private_ip                  = local.center_private_ip
 
   root_block_device {
-    volume_size           = 200
+    volume_size           = local.center_volume_size
     delete_on_termination = true
     volume_type           = "gp3"
     iops                  = 3000
-    throughput            = 125
+    throughput            = 625
   }
 
   tags = {
@@ -192,4 +192,69 @@ resource "aws_instance" "center" {
   }
 
   user_data_base64 = data.cloudinit_config.center_server.rendered
+}
+
+locals {
+  all_instance_ips = merge(
+    { for idx, ip in aws_instance.tidb[*].public_ip : "tidb-${idx}" => ip },
+    { for idx, ip in aws_instance.pd[*].public_ip : "pd-${idx}" => ip },
+    { for idx, ip in aws_instance.tikv[*].public_ip : "tikv-${idx}" => ip },
+    { for idx, ip in aws_instance.tiflash_write[*].public_ip : "tiflash-write-${idx}" => ip },
+    { for idx, ip in aws_instance.tiflash_compute[*].public_ip : "tiflash-compute-${idx}" => ip },
+    { for idx, ip in aws_instance.center[*].public_ip : "center-${idx}" => ip },
+  )
+}
+
+resource "null_resource" "deploy_rocky_ssh_keys" {
+  for_each = local.all_instance_ips
+
+  triggers = {
+    master_key_hash = filebase64sha256(local.master_ssh_key)
+    master_key_pub  = file(local.master_ssh_public)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mkdir -p /home/rocky/.ssh",
+      "set -x",
+      
+      "cat > /tmp/id_rsa << 'EOF'",
+      file("${local.master_ssh_key}"),
+      "EOF",
+      "sudo mv /tmp/id_rsa /home/rocky/.ssh/id_rsa",
+      "sudo chmod 600 /home/rocky/.ssh/id_rsa",
+
+      "cat > /tmp/id_rsa.pub << 'EOF'",
+      file("${local.master_ssh_public}"),
+      "EOF",
+      "sudo mv /tmp/id_rsa.pub /home/rocky/.ssh/id_rsa.pub",
+      "sudo chmod 644 /home/rocky/.ssh/id_rsa.pub",
+
+      "sudo chown -R rocky:rocky /home/rocky/.ssh",
+
+      "sudo mkdir -p /home/rocky/.ssh",
+      "sudo cp /home/rocky/.ssh/id_rsa.pub /home/rocky/.ssh/authorized_keys 2>/dev/null || true",
+      "sudo chmod 600 /home/rocky/.ssh/authorized_keys",
+      "sudo chown rocky:rocky /home/rocky/.ssh/authorized_keys",
+
+      "echo '✅ SSH 密钥已部署到 ${each.key} (${each.value})'"
+    ]
+
+    connection {
+      type        = "ssh"
+      host        = each.value 
+      user        = "rocky"     
+      private_key = file(local.master_ssh_key)
+    }
+  }
+
+  # 确保在所有实例创建后再运行
+  depends_on = [
+    aws_instance.tidb,
+    aws_instance.pd,
+    aws_instance.tikv,
+    aws_instance.tiflash_write,
+    aws_instance.tiflash_compute,
+    aws_instance.center,
+  ]
 }

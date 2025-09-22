@@ -5,36 +5,20 @@ global:
 
 server_configs:
   tidb:
-    enable-safe-point-v2: true
-    force-enable-vector-type: true
-    disaggregated-tiflash: true
-    keyspace-name: "a"
-    ratelimit.full-speed: 1048576000
-    ratelimit.full-speed-capacity: 1048576000
-    ratelimit.low-speed-watermark: 1048576000000
-    ratelimit.block-write-watermark: 1048576000000
-    security.enable-sem: false
-    tiflash-replicas.constraints: [{"key": "engine", "op": "in", "values": ["tiflash"]}, {"key": "engine_role", "op": "in", "values": ["write"]}]
-    tiflash-replicas.group-id: "enable_s3_wn_region"
-    tiflash-replicas.extra-s3-rule: false
-    tiflash-replicas.min-count: 1
+    binlog.enable: false
+    binlog.ignore-error: false
+    log.slow-threshold: 300
+    performance.txn-total-size-limit: 53687091200
   tikv:
-    storage.enable-ttl: true
-    storage.api-version: 2
-    dfs.prefix: "local-cluster"
-    dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
-    dfs.s3-bucket: ${s3_bucket}
-    dfs.s3-region: "${s3_region}"
+    log.file.max-backups: 30
+    import.num_threads: 15
   pd:
-    replication.enable-placement-rules: true
+    # replication.max-replicas: 1
     replication.location-labels: ["host"]
-    replication.max-replica: 1
-    keyspace.pre-alloc: ["a"]
-    schedule.merge-schedule-limit: 0
-    schedule.low-space-ration: 1.0
-    schedule.replica-schedule-limit: 500
+    keyspace.pre-alloc: ["ks1"]
   tiflash:
-    enable_safe_point_v2: true
+  tiflash-learner:
+    log.file.max-backups: 30
 
 tidb_servers:
   %{~ for host in tidb_hosts ~}
@@ -49,33 +33,10 @@ tikv_servers:
   %{~ endfor ~}
 
 tiflash_servers:
-  %{~ for host in tiflash_write_hosts ~}
-  - host: ${host}
-    config:
-      flash.disaggregated_mode: tiflash_write
-      storage.s3.endpoint: http://s3.${s3_region}.amazonaws.com
-      storage.s3.bucket: ${s3_bucket}
-      storage.s3.root: /tiflash-cse/
-      storage.main.dir: ["/tidb-deploy/tiflash-9000/data"]
-      storage.api_version: 2
-    learner_config:
-      dfs.prefix: "local-cluster"
-      dfs.s3-endpoint: "http://s3.${s3_region}.amazonaws.com"
-      dfs.s3-bucket: ${s3_bucket}
-      dfs.s3-region:  "${s3_region}"
-      storage.api-version: 2
-      storage.enable-ttl: true
-  %{~ endfor ~}
   %{~ for host in tiflash_compute_hosts ~}
   - host: ${host}
     config:
-      delta_index_cache_size: 2000
-      flash.disaggregated_mode: tiflash_compute
-      storage.s3.endpoint: http://s3.${s3_region}.amazonaws.com
-      storage.s3.bucket: ${s3_bucket}
-      storage.s3.root: /tiflash-cse/
-      storage.remote.cache.dir: /tidb-deploy/tiflash-9000/remote_cache
-      storage.remote.cache.capacity: 200000000000
+      tcp_port: 9000
       storage.main.dir: ["/tidb-deploy/tiflash-9000/data"]
   %{~ endfor ~}
 

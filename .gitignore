@@ -30,3 +30,5 @@ override.tf.json
 
 master_key
 master_key.pub
+
+.DS_Store

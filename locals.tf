@@ -29,7 +29,7 @@ locals {
   # The IOPS and throughput settings are also related to the EC2 instance type.
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html
   tidb_volume_size            = 20
-  tikv_volume_size            = 500
+  tikv_volume_size            = 1000
   tiflash_write_volume_size   = 100
   tiflash_compute_volume_size = 500
   center_volume_size          = 100

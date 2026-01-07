@@ -1,12 +1,12 @@
 #!/bin/bash
 # This script is executed on the center server
 
-sudo -u ubuntu -i <<'EOF'
+sudo -u ${username} -i <<'EOF'
 
-# install tiup
+# install tiup under the target user
 curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh
 
-# install go-tpc
+# install go-tpc under the target user
 curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/pingcap/go-tpc/master/install.sh | sh
 
 # configure haproxy

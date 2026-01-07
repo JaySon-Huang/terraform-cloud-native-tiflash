@@ -61,6 +61,12 @@ locals {
     })}
     EOT
 
+    cloud_init_center_script = templatefile(
+        "${path.module}/files/cloudinit_center.sh.tftpl",
+        {
+            username = local.username
+        }
+    )
 }
 
 # For all servers except for center server, use the following cloudinit config.
@@ -110,7 +116,7 @@ data "cloudinit_config" "center_server" {
     part {
         content_type = "text/x-shellscript"
         filename     = "cloudinit_center.sh"
-        content      = file("./files/cloudinit_center.sh")
+        content      = local.cloud_init_center_script
     }
 
 }

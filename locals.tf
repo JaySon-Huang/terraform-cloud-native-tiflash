@@ -35,12 +35,12 @@ locals {
   tiflash_write_volume = {
     size       = 100
     iops       = 10000
-    throughput = 625
+    throughput = 312
   }
   tiflash_compute_volume = {
     size       = 500
     iops       = 6000
-    throughput = 1000
+    throughput = 312
   }
   tidb_volume = {
     size       = 20

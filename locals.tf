@@ -8,11 +8,11 @@ locals {
   n_tiflash_write   = 0
   n_tiflash_compute = 1
 
-  ## Ubuntu images on aws: https://cloud-images.ubuntu.com/locator/ec2/
-  region   = "us-west-2"
-  image    = "ami-003e5556ddc999e13" # Ubuntu 22.04 + OMZ + KernelTunes
-  username = "ubuntu"
   # image is region-local. If you changed region, please also change image.
+  ## Ubuntu images on aws: https://cloud-images.ubuntu.com/locator/ec2/
+  region   = "ap-southeast-1"
+  image    = "ami-03cc493b9a33586c1" # Ubuntu 26.04 LTS
+  username = "ubuntu"
   ## RockyLinux images on aws: https://rockylinux.org/download
   # region   = "us-west-2"
   # image    = "ami-0fadb4bc4d6071e9e" # Rocky-9-EC2-Base-9.6-20250531.0.x86_64

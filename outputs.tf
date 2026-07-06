@@ -18,6 +18,10 @@ output "private-ip-tikv" {
   value = local.tikv_private_ips
 }
 
+output "private-ip-tikv-worker" {
+  value = local.tikv_worker_private_ips
+}
+
 output "private-ip-tiflash-write" {
   value = local.tiflash_write_private_ips
 }

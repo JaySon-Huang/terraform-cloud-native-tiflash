@@ -26,8 +26,7 @@ locals {
   tiflash_compute_instance = "m7a.4xlarge"
   # 8c, 32GB
   tikv_worker_instance = "m7a.2xlarge"
-  # tiflash_write_instance   = "m7a.2xlarge"
-  # tiflash_compute_instance = "m7a.2xlarge"
+  tiflash_write_instance = "m7a.2xlarge"
   # 16c, 32GB
   center_instance = "c6a.4xlarge"
   # 4c, 8GB

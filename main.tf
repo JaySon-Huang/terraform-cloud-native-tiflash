@@ -21,6 +21,13 @@ provider "aws" {
 
 resource "random_id" "id" {
   byte_length = 4
+
+  lifecycle {
+    precondition {
+      condition     = contains([0, 1], local.n_tikv_worker)
+      error_message = "n_tikv_worker only support 0 or 1."
+    }
+  }
 }
 
 resource "aws_key_pair" "master_key" {
@@ -31,8 +38,11 @@ locals {
   pd_private_ip               = "172.31.8.1"
   tidb_private_ips            = [for i in range(local.n_tidb) : "172.31.7.${i + 1}"]
   tikv_private_ips            = [for i in range(local.n_tikv) : "172.31.6.${i + 1}"]
+  tikv_worker_private_ips     = [for i in range(local.n_tikv_worker) : "172.31.11.${i + 1}"]
   tiflash_write_private_ips   = [for i in range(local.n_tiflash_write) : "172.31.9.${i + 1}"]
   tiflash_compute_private_ips = [for i in range(local.n_tiflash_compute) : "172.31.10.${i + 1}"]
+  tikv_worker_enabled         = local.n_tikv_worker > 0
+  tikv_worker_url             = length(local.tikv_worker_private_ips) > 0 ? "http://${local.tikv_worker_private_ips[0]}:19000" : ""
   center_private_ip           = "172.31.1.1"
 }
 
@@ -110,6 +120,33 @@ resource "aws_instance" "tikv" {
 
   tags = {
     Name = "${local.namespace}-tikv-${count.index}"
+  }
+
+  user_data_base64 = data.cloudinit_config.common_server.rendered
+}
+
+resource "aws_instance" "tikv_worker" {
+  count = local.n_tikv_worker
+
+  ami                         = local.image
+  instance_type               = local.tikv_worker_instance
+  key_name                    = aws_key_pair.master_key.id
+  vpc_security_group_ids      = [aws_security_group.ssh.id]
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+  subnet_id                   = aws_subnet.main.id
+  associate_public_ip_address = true
+  private_ip                  = local.tikv_worker_private_ips[count.index]
+
+  root_block_device {
+    volume_size           = local.tikv_worker_volume.size
+    delete_on_termination = true
+    volume_type           = "gp3"
+    iops                  = local.tikv_worker_volume.iops
+    throughput            = local.tikv_worker_volume.throughput
+  }
+
+  tags = {
+    Name = "${local.namespace}-tikv-worker-${count.index}"
   }
 
   user_data_base64 = data.cloudinit_config.common_server.rendered

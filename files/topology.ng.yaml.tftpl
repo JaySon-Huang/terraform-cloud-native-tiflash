@@ -17,7 +17,7 @@ server_configs:
     dfs.s3-bucket: "${s3_bucket}"
     dfs.s3-region: "${s3_region}"
     log.file.max-backups: 30
-  tikv_worker_servers:
+  tikv_worker:
     dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
     dfs.s3-bucket: "${s3_bucket}"
     dfs.s3-region: "${s3_region}"
@@ -48,7 +48,11 @@ tidb_servers:
       keyspace-name: "SYSTEM"
       instance.tidb_service_scope: dxf_service
       cse.columnar-store-type: "columnar"
-      # tikv-worker-url: 
+%{ if tikv_worker_enabled ~}
+      tikv-worker-url: "${tikv_worker_url}"
+%{ else ~}
+      # tikv-worker-url:
+%{ endif ~}
   %{~ endfor ~}
 
 tikv_servers:
@@ -58,7 +62,11 @@ tikv_servers:
       server.labels: { host: "tikv${idx}" }
       kvengine.build-columnar: true
       kvengine.build-fts-index: true
-      # dfs.remote-compactor-addr: "http://10.2.12.81:19000/compact"
+%{ if tikv_worker_enabled ~}
+      dfs.remote-compactor-addr: "${tikv_worker_url}/compact"
+%{ else ~}
+      # dfs.remote-compactor-addr:
+%{ endif ~}
   %{~ endfor ~}
 
 tikv_worker_servers:

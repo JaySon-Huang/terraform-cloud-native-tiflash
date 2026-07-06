@@ -53,6 +53,9 @@ locals {
             content     = base64encode(templatefile("./files/topology.ng.yaml.tftpl", {
                 tidb_hosts = local.tidb_private_ips,
                 tikv_hosts = local.tikv_private_ips,
+                tikv_worker_hosts = local.tikv_worker_private_ips,
+                tikv_worker_enabled = local.tikv_worker_enabled,
+                tikv_worker_url = local.tikv_worker_url,
                 tiflash_write_hosts = local.tiflash_write_private_ips,
                 tiflash_compute_hosts = local.tiflash_compute_private_ips,
                 s3_region = local.region,

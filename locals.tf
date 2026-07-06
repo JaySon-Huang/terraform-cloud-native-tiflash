@@ -21,12 +21,12 @@ locals {
   # If you want to change instance type, ensure that GP3 EBS is available in the instance type.
   # https://aws.amazon.com/ec2/instance-types/
   # 16c, 64GB
-  tidb_instance = "m7a.4xlarge"
-  tikv_instance = "m7a.4xlarge"
-  tiflash_compute_instance = "m7a.4xlarge"
+  tidb_instance = "m6a.4xlarge"
+  tikv_instance = "m6a.4xlarge"
+  tiflash_compute_instance = "m6a.4xlarge"
   # 8c, 32GB
-  tikv_worker_instance = "m7a.2xlarge"
-  tiflash_write_instance = "m7a.2xlarge"
+  tikv_worker_instance = "m6a.2xlarge"
+  tiflash_write_instance = "m6a.2xlarge"
   # 16c, 32GB
   center_instance = "c6a.4xlarge"
   # 4c, 8GB

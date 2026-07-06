@@ -14,10 +14,14 @@ server_configs:
     storage.enable-ttl: true
     dfs.prefix: "tikv"
     dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
-    dfs.s3-bucket: ${s3_bucket}
+    dfs.s3-bucket: "${s3_bucket}"
     dfs.s3-region: "${s3_region}"
     log.file.max-backups: 30
-    import.num_threads: 15
+  tikv_worker_servers:
+    dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
+    dfs.s3-bucket: "${s3_bucket}"
+    dfs.s3-region: "${s3_region}"
+    dfs.prefix: "tikv"
   pd:
     # replication.max-replicas: 1
     replication.location-labels: ["host"]
@@ -25,14 +29,14 @@ server_configs:
   tiflash:
     storage.api_version: 2
     storage.s3.endpoint: http://s3.${s3_region}.amazonaws.com
-    storage.s3.bucket: ${s3_bucket}
+    storage.s3.bucket: "${s3_bucket}"
     storage.s3.root: "/tiflash"
   tiflash-learner:
     log.file.max-backups: 30
     storage.enable-ttl: true
     storage.api-version: 2
     dfs.s3-endpoint: http://s3.${s3_region}.amazonaws.com
-    dfs.s3-bucket: ${s3_bucket}
+    dfs.s3-bucket: "${s3_bucket}"
     dfs.prefix: "tikv"
     dfs.s3-region: "${s3_region}"
 
@@ -41,8 +45,10 @@ tidb_servers:
   - host: ${host}
     config:
       disaggregated-tiflash: true
-      keyspace-name: "ks1"
-      tidb-service-scope: dxf_service
+      keyspace-name: "SYSTEM"
+      instance.tidb_service_scope: dxf_service
+      cse.columnar-store-type: "columnar"
+      # tikv-worker-url: 
   %{~ endfor ~}
 
 tikv_servers:
@@ -50,6 +56,17 @@ tikv_servers:
   - host: ${host}
     config:
       server.labels: { host: "tikv${idx}" }
+      kvengine.build-columnar: true
+      kvengine.build-fts-index: true
+      # dfs.remote-compactor-addr: "http://10.2.12.81:19000/compact"
+  %{~ endfor ~}
+
+tikv_worker_servers:
+  %{~ for idx, host in tikv_worker_hosts ~}
+  - host: ${host}
+    config:
+      schema-manager.enabled: true
+      schema-manager.keyspace-refresh-interval: "50ms"
   %{~ endfor ~}
 
 tiflash_servers:
@@ -64,6 +81,7 @@ tiflash_servers:
   %{~ for host in tiflash_compute_hosts ~}
   - host: ${host}
     config:
+      flash.use_columnar: true
       tcp_port: 9000
       flash.disaggregated_mode: tiflash_compute
       storage.remote.cache.dir: /tidb-deploy/tiflash-9000/remote_cache
@@ -79,3 +97,4 @@ monitoring_servers:
 
 grafana_servers:
   - host: 172.31.8.1
+    anonymous_enable: true

@@ -2,10 +2,11 @@
 
 locals {
   namespace         = "jayson-next-gen"
-  n_tidb            = 2
+  n_tidb            = 1
   n_tikv            = 3
-  n_tiflash_write   = 2
-  n_tiflash_compute = 2
+  n_tikv_worker     = 1
+  n_tiflash_write   = 0
+  n_tiflash_compute = 1
 
   ## Ubuntu images on aws: https://cloud-images.ubuntu.com/locator/ec2/
   region   = "us-west-2"
@@ -22,9 +23,11 @@ locals {
   # 16c, 64GB
   tidb_instance = "m7a.4xlarge"
   tikv_instance = "m7a.4xlarge"
+  tiflash_compute_instance = "m7a.4xlarge"
   # 8c, 32GB
-  tiflash_write_instance   = "m7a.2xlarge"
-  tiflash_compute_instance = "m7a.2xlarge"
+  tikv_worker_instance = "m7a.2xlarge"
+  # tiflash_write_instance   = "m7a.2xlarge"
+  # tiflash_compute_instance = "m7a.2xlarge"
   # 16c, 32GB
   center_instance = "c6a.4xlarge"
   # 4c, 8GB
@@ -50,6 +53,11 @@ locals {
   tikv_volume = {
     size       = 1000
     iops       = 16000
+    throughput = 625
+  }
+  tikv_worker_volume = {
+    size       = 100
+    iops       = 3000
     throughput = 625
   }
   pd_volume = {

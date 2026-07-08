@@ -15,6 +15,7 @@ locals {
             permissions = "0644"
             owner       = "${local.username}:${local.username}"
             encoding    = "b64"
+            defer       = true
             content     = base64encode(templatefile("./files/haproxy.cfg.tftpl", {
                 tidb_hosts = local.tidb_private_ips,
             }))
@@ -30,6 +31,7 @@ locals {
             permissions = "0644"
             owner       = "${local.username}:${local.username}"
             encoding    = "b64"
+            defer       = true
             content     = base64encode(templatefile("./files/topology.yaml.tftpl", {
                 tidb_hosts = local.tidb_private_ips,
                 tikv_hosts = local.tikv_private_ips,
@@ -50,6 +52,7 @@ locals {
             permissions = "0644"
             owner       = "${local.username}:${local.username}"
             encoding    = "b64"
+            defer       = true
             content     = base64encode(templatefile("./files/topology.ng.yaml.tftpl", {
                 tidb_hosts = local.tidb_private_ips,
                 tikv_hosts = local.tikv_private_ips,
@@ -73,12 +76,14 @@ locals {
             permissions = "0400"
             owner       = "${local.username}:${local.username}"
             encoding    = "b64"
+            defer       = true
             content     = base64encode(file(local.master_ssh_key))
         }, {
             path        = "/home/${local.username}/.ssh/id_rsa.pub"
             permissions = "0644"
             owner       = "${local.username}:${local.username}"
             encoding    = "b64"
+            defer       = true
             content     = base64encode(file(local.master_ssh_public))
         }]
     })}

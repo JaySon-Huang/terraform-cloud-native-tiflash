@@ -2,7 +2,7 @@
 
 locals {
   namespace         = "jayson-next-gen"
-  n_tidb            = 1
+  n_tidb            = 2
   n_tikv            = 3
   n_tikv_worker     = 1
   n_tiflash_write   = 0
@@ -50,7 +50,7 @@ locals {
     throughput = 625
   }
   tikv_volume = {
-    size       = 1000
+    size       = 5000
     iops       = 16000
     throughput = 625
   }
@@ -65,7 +65,7 @@ locals {
     throughput = 125
   }
   center_volume = {
-    size       = 100
+    size       = 5100
     iops       = 3000
     throughput = 625
   }
